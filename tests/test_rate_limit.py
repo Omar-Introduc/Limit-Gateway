@@ -2,6 +2,7 @@ import httpx
 import asyncio
 from gateway.app.main import app
 
+
 # Use ASGITransport to test the app directly without a running server
 async def _run_test_rate_limit():
     print("Starting Rate Limit Test...")
