@@ -12,6 +12,6 @@ format:
 	black .
 
 test:
-	pytest
+	python -m pytest
 
 ci: install lint format test
