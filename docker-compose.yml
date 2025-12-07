@@ -1,0 +1,23 @@
+services:
+  backend:
+    image: backend-service:0.1.0
+    build: ./backend/
+    expose:
+      - "8000"
+    networks:
+      - internal_net
+
+  gateway:
+    image: gateway-service:0.1.0
+    build: ./gateway/
+    environment:
+      - BACKEND_URL=http://backend:8000
+    ports:
+      - "8000:8001"
+    networks:
+      - internal_net
+      - public_net
+
+networks:
+  internal_net:
+  public_net:
