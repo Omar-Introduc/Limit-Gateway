@@ -1,11 +1,12 @@
 import httpx
 import asyncio
-import pytest
 
 GATEWAY_URL = "http://localhost:8001"
 
+
 def test_rate_limit():
     asyncio.run(_run_test_rate_limit())
+
 
 async def _run_test_rate_limit():
     print("Starting Rate Limit Test...")
