@@ -17,6 +17,13 @@ RATE_LIMIT = 10
 TIME_WINDOW = 60
 
 
+import logging
+import json
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger("gateway")
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     # Limitación de velocidad de salto para /métricas y /salud
@@ -31,10 +38,24 @@ async def rate_limit_middleware(request: Request, call_next):
         t for t in request_counts[client_ip] if current_time - t < TIME_WINDOW
     ]
 
+    # Initialize log data
+    log_data = {
+        "ip": client_ip,
+        "endpoint": request.url.path,
+        "status": 200,
+        "rate_limited": False
+    }
+
     # Límite de verificación
     if len(request_counts[client_ip]) >= RATE_LIMIT:
         metrics["blocked_requests"] += 1
         metrics["banned_ips"].add(client_ip)
+        
+        # Log blocked request
+        log_data["status"] = 429
+        log_data["rate_limited"] = True
+        logger.info(json.dumps(log_data))
+        
         return Response(content="Too Many Requests", status_code=429)
 
     # Permitir solicitud
@@ -42,6 +63,11 @@ async def rate_limit_middleware(request: Request, call_next):
     metrics["total_requests"] += 1
 
     response = await call_next(request)
+    
+    # Log allowed request
+    log_data["status"] = response.status_code
+    logger.info(json.dumps(log_data))
+    
     return response
 
 
