@@ -62,14 +62,14 @@ jobs:
 
       # --- Generate SBOM with Syft ---
       - name: Generate SBOM (Backend)
-        uses: anchore/syft-action@v0.18.0
+        uses: anchore/sbom-action@v0
         with:
           image: backend-service:0.1.0
           format: json
           output-file: .evidence/sbom-backend.json
 
       - name: Generate SBOM (Gateway)
-        uses: anchore/syft-action@v0.18.0
+        uses: anchore/sbom-action@v0
         with:
           image: gateway-service:0.1.0
           format: json
