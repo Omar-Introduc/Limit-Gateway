@@ -10,9 +10,10 @@ NUM_REQUESTS = 100
 EVIDENCE_DIR = ".evidence"
 REPORT_FILE = os.path.join(EVIDENCE_DIR, "abuse-test-report.json")
 
+
 async def run_abuse_test():
     print(f"Starting abuse test against {GATEWAY_URL} with {NUM_REQUESTS} requests...")
-    
+
     # Ensure evidence directory exists
     os.makedirs(EVIDENCE_DIR, exist_ok=True)
 
@@ -23,7 +24,7 @@ async def run_abuse_test():
         "other_status_count": 0,
         "status_codes": {},
         "initial_metrics": {},
-        "final_metrics": {}
+        "final_metrics": {},
     }
 
     async with httpx.AsyncClient(base_url=GATEWAY_URL, timeout=10.0) as client:
@@ -44,19 +45,21 @@ async def run_abuse_test():
         tasks = [client.get("/proxy/test") for _ in range(NUM_REQUESTS)]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
         end_time = time.time()
-        
+
         results["duration_seconds"] = end_time - start_time
-        print(f"Sent {NUM_REQUESTS} requests in {results['duration_seconds']:.2f} seconds")
+        print(
+            f"Sent {NUM_REQUESTS} requests in {results['duration_seconds']:.2f} seconds"
+        )
 
         # 3. Analyze responses
         for resp in responses:
             if isinstance(resp, Exception):
                 print(f"Request failed: {resp}")
                 continue
-            
+
             code = resp.status_code
             results["status_codes"][code] = results["status_codes"].get(code, 0) + 1
-            
+
             if code == 200:
                 results["success_count"] += 1
             elif code == 429:
@@ -78,9 +81,11 @@ async def run_abuse_test():
     # 5. Generate Report
     with open(REPORT_FILE, "w") as f:
         json.dump(results, f, indent=4)
-    
+
     print(f"Report generated at {REPORT_FILE}")
-    print(f"Summary: Success={results['success_count']}, Blocked={results['blocked_count']}")
+    print(
+        f"Summary: Success={results['success_count']}, Blocked={results['blocked_count']}"
+    )
 
     # Validation Logic for CI/Verification - Verify block happened if rate limit is low enough
     # Note: We rely on the user knowing the limit. If 100 requests in <1s don't trigger limit, something is wrong.
@@ -88,6 +93,7 @@ async def run_abuse_test():
         print("SUCCESS: Rate limiting detected.")
     else:
         print("WARNING: No requests were blocked.")
+
 
 if __name__ == "__main__":
     asyncio.run(run_abuse_test())
