@@ -1,0 +1,67 @@
+name: Security & Abuse Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  abuse-test:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install httpx
+
+      - name: Start Environment
+        run: |
+          docker compose up -d --build
+          echo "Waiting for Gateway to be ready..."
+          sleep 10 # Basic wait
+
+      - name: Check Gateway Health
+        run: |
+          count=0
+          while [ $count -lt 30 ]; do
+            if curl -s http://localhost:8001/metrics > /dev/null; then
+              echo "Gateway is up!"
+              exit 0
+            fi
+            echo "Waiting for gateway..."
+            sleep 2
+            ((count++))
+          done
+          echo "Gateway failed to start"
+          docker compose logs
+          exit 1
+
+      - name: Run Abuse Test
+        env:
+          GATEWAY_URL: "http://localhost:8001"
+        run: |
+          python tests/abuse_test.py
+
+      - name: Archive Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: abuse-test-report
+          path: .evidence/
+
+      - name: Tear Down
+        if: always()
+        run: docker compose down
