@@ -35,23 +35,13 @@ jobs:
 
       - name: Check Gateway Health
         run: |
-          count=0
-          while [ $count -lt 30 ]; do
-            if curl -s http://localhost:8001/metrics > /dev/null; then
-              echo "Gateway is up!"
-              exit 0
-            fi
-            echo "Waiting for gateway..."
-            sleep 2
-            ((count++))
-          done
-          echo "Gateway failed to start"
-          docker compose logs
-          exit 1
+          echo "Esperando a que el Gateway levante en el puerto 8000..."
+          timeout 30s bash -c 'until curl --silent --fail http://localhost:8000/metrics; do echo "Reintentando..."; sleep 2; done'
+          echo "Gateway is up!"
 
       - name: Run Abuse Test
         env:
-          GATEWAY_URL: "http://localhost:8001"
+          GATEWAY_URL: "http://localhost:8000"
         run: |
           python tests/abuse_test.py
 

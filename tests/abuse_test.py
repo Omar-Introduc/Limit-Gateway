@@ -5,7 +5,7 @@ import json
 import time
 
 # Configuration
-GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8001")
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8000")
 NUM_REQUESTS = 100
 EVIDENCE_DIR = ".evidence"
 REPORT_FILE = os.path.join(EVIDENCE_DIR, "abuse-test-report.json")
