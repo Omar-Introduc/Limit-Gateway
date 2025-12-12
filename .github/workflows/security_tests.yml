@@ -39,6 +39,9 @@ jobs:
           timeout 30s bash -c 'until curl --silent --fail http://localhost:8000/metrics; do echo "Reintentando..."; sleep 2; done'
           echo "Gateway is up!"
 
+      - name: Create Evidence Directory
+        run: mkdir -p .evidence
+
       - name: Run Abuse Test
         env:
           GATEWAY_URL: "http://localhost:8000"
