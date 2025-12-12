@@ -1,0 +1,10 @@
+{
+    "total_requests": 100,
+    "success_count": 0,
+    "blocked_count": 0,
+    "other_status_count": 0,
+    "status_codes": {},
+    "initial_metrics": {},
+    "final_metrics": {},
+    "duration_seconds": 0.049486398696899414
+}
