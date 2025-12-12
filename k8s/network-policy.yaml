@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy #Regla de firewall
+metadata:
+  name: protect-backend
+  namespace: internal #Se aplica en el namespace del Backend
+spec:
+  podSelector:
+    matchLabels:
+      app: backend #Solo afecta a los pods con etiqueta app: backend
+  
+  #Controla trafico de entrada
+  policyTypes:
+  - Ingress
+  
+  #Ingreso
+  ingress:
+  - from:
+    #Permite si ambos se cumplen (mismo guion)
+    #si viene del namespace edge
+    - namespaceSelector:
+        matchLabels:
+          name: edge
+      #y debe venir de un pod con label app: gateway
+      podSelector:
+        matchLabels:
+          app: gateway
+    
+    #Registra el puerto
+    ports:
+    - protocol: TCP
+      port: 8000 #El puerto donde escucha el backend
